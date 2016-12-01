@@ -1,0 +1,49 @@
+-- --------------------------------------------------------------------
+-- AUTOR:  @dgonzalez
+-- INICIO: 01/Dic/2016
+-- DESC:   Genera xml y guarda en un directorio
+-- --------------------------------------------------------------------
+DECLARE
+  v_ctx   DBMS_XMLGEN.ctxhandle;
+  v_file  UTL_FILE.file_type;
+  v_xml   CLOB;
+  v_more  BOOLEAN := TRUE;
+BEGIN
+  -- Create XML context.
+  v_ctx := DBMS_XMLGEN.newcontext('SELECT * FROM alumnos WHERE id_alumno = 1');
+
+  -- Set parameters to alter default Rowset and Row tag names and default case.
+  DBMS_XMLGEN.setrowsettag(v_ctx, 'USER_TABLES'); 
+  DBMS_XMLGEN.setrowtag(v_ctx, 'TABLE'); 
+  --DBMS_XMLGEN.settagcase(v_ctx, DBMS_XMLGen.LOWER_CASE);
+
+  -- Add an IE specfic XSL stylesheet reference so browser can transform the file.
+  --DBMS_XMLGEN.setstylesheetheader(v_ctx, 'C:\Development\XML\IEStyle.xsl', 'text/xsl');
+
+  -- Create the XML document.
+  v_xml := DBMS_XMLGEN.getxml(v_ctx);
+  DBMS_XMLGEN.closecontext(v_ctx);
+
+  -- Output XML document to file.
+  -- Pendiente por definir PATH
+  v_file := UTL_FILE.fopen("C:\Users\dorad\Desktop\", 'test1.xml', 'w');
+  WHILE v_more LOOP
+    UTL_FILE.put(v_file, SUBSTR(v_xml, 1, 32767));
+    IF LENGTH(v_xml) > 32767 THEN
+      v_xml :=  SUBSTR(v_xml, 32768);
+    ELSE
+      v_more := FALSE;
+    END IF;
+  END LOOP;
+  UTL_FILE.fclose(v_file);
+
+  -- test insert into table
+  /*
+  insert into t_clob (clob_col) values (v_xml);
+  commit;
+  */
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.put_line(Substr(SQLERRM,1,255));
+    UTL_FILE.fclose(v_file);
+END;
