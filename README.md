@@ -66,3 +66,16 @@ CREATE TABLE nombre_tabla
   columna_n datatype [ NULL | NOT NULL ]
 );
 ```
+
+***TRIGGERS***
+Cuando se trabaja con triggers a nivel de fila, Oracle provee de dos tablas temporales a las que podemos acceder, que contienen los nuevos y los antiguos valores de los campos afectados por la sentencia que disparó el trigger, el nuevo valor es :new y el antigio es :old, para referirnos a ellos debemos de especificar su campo separado por un punto :NEW.CAMPO, :OLD.CAMPO.
+```SQL
+create or replace trigger tr_actualizar_precio_libros
+ before update of precio
+ on libros
+ for each row
+ begin
+  insert into control values(user,sysdate,:new.codigo,:old.precio,:new.precio);
+ end tr_actualizar_precio_libros;
+ 
+```
